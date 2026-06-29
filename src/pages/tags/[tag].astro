@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import PostCard from '../../components/PostCard.astro';
+import { getAllTags, getPublishedPosts, type Post } from '../../lib/content';
+
+export async function getStaticPaths() {
+	const posts = await getPublishedPosts();
+	return getAllTags(posts).map((tag) => ({
+		params: { tag: tag.name },
+		props: {
+			tag: tag.name,
+			posts,
+			tagPosts: posts.filter((post) => post.data.tags.includes(tag.name)),
+		},
+	}));
+}
+
+interface Props {
+	tag: string;
+	posts: Post[];
+	tagPosts: Post[];
+}
+
+const { tag, posts, tagPosts } = Astro.props;
+const tags = getAllTags(posts);
+---
+
+<BaseLayout title={`标签：${tag}`} description={`May 的 ${tag} 标签文章。`}>
+	<div class="container layout-grid">
+		<div class="main-column">
+			<header class="page-hero">
+				<p class="eyebrow">Tag</p>
+				<h1 class="page-title">#{tag}</h1>
+				<p class="page-description">当前标签共有 {tagPosts.length} 篇文章。</p>
+			</header>
+			<div class="filter-bar">
+				{tags.map((item) => (
+					<a class:list={['filter-link', item.name === tag ? 'is-active' : '']} href={`/tags/${encodeURIComponent(item.name)}`}>#{item.name}</a>
+				))}
+			</div>
+			<div class="article-list">
+				{tagPosts.map((post) => <PostCard post={post} />)}
+			</div>
+		</div>
+		<Sidebar posts={posts} />
+	</div>
+</BaseLayout>

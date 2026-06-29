@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Sidebar from '../components/Sidebar.astro';
+import BookItem from '../components/BookItem.astro';
+import { getAllBooks, getPublishedPosts } from '../lib/content';
+
+const posts = await getPublishedPosts();
+const books = await getAllBooks();
+const statuses = ['在读', '已读', '想读'];
+---
+
+<BaseLayout title="读书" description="May 的读书记录与阅读笔记。">
+	<div class="container layout-grid">
+		<div class="main-column">
+			<header class="page-hero">
+				<p class="eyebrow">Reading</p>
+				<h1 class="page-title">读书</h1>
+				<p class="page-description">读书页用于记录想读、在读和已读的书，也保留后续整理成长笔记的入口。</p>
+			</header>
+			{statuses.map((status) => {
+				const group = books.filter((book) => book.data.status === status);
+				return group.length > 0 && (
+					<section class="section">
+						<div class="section-head">
+							<h2 class="section-title">{status}</h2>
+						</div>
+						<div class="book-list">
+							{group.map((book) => <BookItem book={book} />)}
+						</div>
+					</section>
+				);
+			})}
+		</div>
+		<Sidebar posts={posts} />
+	</div>
+</BaseLayout>

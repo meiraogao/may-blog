@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import PostCard from '../../components/PostCard.astro';
+import { site } from '../../lib/site';
+import { getPublishedPosts, type Post } from '../../lib/content';
+
+export async function getStaticPaths() {
+	const posts = await getPublishedPosts();
+	return site.categories.map((category) => ({
+		params: { category },
+		props: {
+			category,
+			posts,
+			categoryPosts: posts.filter((post) => post.data.category === category),
+		},
+	}));
+}
+
+interface Props {
+	category: string;
+	posts: Post[];
+	categoryPosts: Post[];
+}
+
+const { category, posts, categoryPosts } = Astro.props;
+---
+
+<BaseLayout title={`${category}文章`} description={`May 的${category}分类文章。`}>
+	<div class="container layout-grid">
+		<div class="main-column">
+			<header class="page-hero">
+				<p class="eyebrow">Category</p>
+				<h1 class="page-title">{category}</h1>
+				<p class="page-description">当前分类共有 {categoryPosts.length} 篇文章。</p>
+			</header>
+			<div class="filter-bar">
+				<a class="filter-link" href="/posts">全部</a>
+				{site.categories.map((item) => (
+					<a class:list={['filter-link', item === category ? 'is-active' : '']} href={`/categories/${encodeURIComponent(item)}`}>{item}</a>
+				))}
+			</div>
+			<div class="article-list">
+				{categoryPosts.length > 0 ? categoryPosts.map((post) => <PostCard post={post} />) : <p class="empty-state">这个分类暂时还没有文章。</p>}
+			</div>
+		</div>
+		<Sidebar posts={posts} />
+	</div>
+</BaseLayout>

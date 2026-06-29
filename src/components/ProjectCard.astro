@@ -1,0 +1,40 @@
+---
+import type { Project } from '../lib/content';
+import { formatDate } from '../lib/content';
+
+interface Props {
+	project: Project;
+	compact?: boolean;
+}
+
+const { project, compact = false } = Astro.props;
+---
+
+<article class:list={['card', compact ? 'project-card compact' : 'project-card']} id={project.id}>
+	{project.data.image ? (
+		<a class="project-shot" href={project.data.link || `/projects#${project.id}`} aria-label={project.data.title}>
+			<img src={project.data.image} alt={`${project.data.title} 截图`} loading="lazy" />
+		</a>
+	) : (
+		<a class="project-shot project-shot-fallback" href={project.data.link || `/projects#${project.id}`} aria-label={project.data.title}>
+			<span>{project.data.type}</span>
+			<strong>{project.data.title}</strong>
+		</a>
+	)}
+	<div>
+		<div class="article-meta">
+			<span class="pill">{project.data.type}</span>
+			<span>{project.data.status}</span>
+			<time datetime={project.data.date.toISOString()}>{formatDate(project.data.date)}</time>
+		</div>
+		<h3 class="project-title">
+			<a href={project.data.link || `/projects#${project.id}`}>{project.data.title}</a>
+		</h3>
+		<p class="project-description">{project.data.description}</p>
+		{project.data.techStack.length > 0 && (
+			<div class="tag-row">
+				{project.data.techStack.map((tech) => <span class="tag">{tech}</span>)}
+			</div>
+		)}
+	</div>
+</article>

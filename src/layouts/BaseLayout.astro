@@ -1,0 +1,100 @@
+---
+import '../styles/global.css';
+import { site } from '../lib/site';
+
+interface Props {
+	title?: string;
+	description?: string;
+}
+
+const {
+	title = site.name,
+	description = site.description,
+} = Astro.props;
+
+const pageTitle = title === site.name ? `${site.name} - ${site.tagline}` : `${title} - ${site.name}`;
+const currentPath = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<meta name="description" content={description} />
+		<meta property="og:title" content={pageTitle} />
+		<meta property="og:description" content={description} />
+		<meta property="og:type" content="website" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<title>{pageTitle}</title>
+		<script is:inline>
+			const storedTheme = localStorage.getItem('theme');
+			const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+			if (storedTheme === 'dark' || (!storedTheme && prefersDark)) {
+				document.documentElement.classList.add('dark');
+			}
+		</script>
+	</head>
+	<body>
+		<a class="skip-link" href="#content">跳到正文</a>
+		<div class="site-shell">
+			<header class="site-header">
+				<div class="container header-inner">
+					<a class="brand" href="/" aria-label="May 首页">
+						<span class="brand-mark">{site.avatarText}</span>
+						<span class="brand-text">
+							<span class="brand-title">{site.name}</span>
+							<span class="brand-subtitle">{site.tagline}</span>
+						</span>
+					</a>
+					<nav class="site-nav" aria-label="主导航">
+						{site.nav.map((item) => (
+							<a
+								class:list={[
+									'nav-link',
+									currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href))
+										? 'is-active'
+										: '',
+								]}
+								href={item.href}
+							>
+								{item.label}
+							</a>
+						))}
+					</nav>
+					<div class="header-actions">
+						<a class="icon-button" href="/search" aria-label="搜索" title="搜索">
+							<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+								<path d="m21 21-4.2-4.2m2.2-5.3a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+							</svg>
+						</a>
+						<button class="icon-button" id="theme-toggle" type="button" aria-label="切换深浅色" title="切换深浅色">
+							<svg class="icon theme-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+								<path d="M12 4V2m0 20v-2m8-8h2M2 12h2m14.36-6.36 1.42-1.42M4.22 19.78l1.42-1.42m12.72 0 1.42 1.42M4.22 4.22l1.42 1.42M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+							</svg>
+						</button>
+					</div>
+				</div>
+			</header>
+			<main id="content">
+				<slot />
+			</main>
+			<footer class="footer">
+				<div class="container footer-inner">
+					<span>© {new Date().getFullYear()} {site.name}</span>
+					<span>{site.tagline} · {site.location}</span>
+				</div>
+			</footer>
+		</div>
+		<script>
+			const toggle = document.querySelector<HTMLButtonElement>('#theme-toggle');
+			toggle?.addEventListener('click', () => {
+				const root = document.documentElement;
+				const next = root.classList.toggle('dark') ? 'dark' : 'light';
+				localStorage.setItem('theme', next);
+			});
+		</script>
+	</body>
+</html>

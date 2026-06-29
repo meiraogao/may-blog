@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import PostCard from '../../components/PostCard.astro';
+import { site } from '../../lib/site';
+import { getPublishedPosts } from '../../lib/content';
+
+const posts = await getPublishedPosts();
+---
+
+<BaseLayout title="文章" description="May 的技术文章、产品观察、读书和生活记录。">
+	<div class="container layout-grid">
+		<div class="main-column">
+			<header class="page-hero">
+				<p class="eyebrow">Posts</p>
+				<h1 class="page-title">文章</h1>
+				<p class="page-description">技术、AI、产品、投资、读书、随笔、项目记录与生活观察都会在这里持续沉淀。</p>
+			</header>
+			<div class="filter-bar" aria-label="文章分类">
+				<a class="filter-link is-active" href="/posts">全部</a>
+				{site.categories.map((category) => (
+					<a class="filter-link" href={`/categories/${encodeURIComponent(category)}`}>{category}</a>
+				))}
+			</div>
+			<div class="article-list">
+				{posts.map((post) => <PostCard post={post} />)}
+			</div>
+		</div>
+		<Sidebar posts={posts} />
+	</div>
+</BaseLayout>

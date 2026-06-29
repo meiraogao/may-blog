@@ -1,0 +1,105 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Sidebar from '../components/Sidebar.astro';
+import { getAllBooks, getAllProjects, getPostUrl, getPublishedPosts } from '../lib/content';
+
+const posts = await getPublishedPosts();
+const projects = await getAllProjects();
+const books = await getAllBooks();
+
+const searchItems = [
+	...posts.map((post) => ({
+		type: '文章',
+		title: post.data.title,
+		description: post.data.description,
+		url: getPostUrl(post),
+		text: `${post.data.title} ${post.data.description} ${post.data.category} ${post.data.tags.join(' ')} ${post.body}`,
+	})),
+	...projects.map((project) => ({
+		type: '项目',
+		title: project.data.title,
+		description: project.data.description,
+		url: project.data.link || `/projects#${project.id}`,
+		text: `${project.data.title} ${project.data.description} ${project.data.type} ${project.data.status} ${project.data.techStack.join(' ')} ${project.body}`,
+	})),
+	...books.map((book) => ({
+		type: '读书',
+		title: book.data.title,
+		description: `${book.data.author} · ${book.data.status}${book.data.description ? ` · ${book.data.description}` : ''}`,
+		url: book.data.noteUrl || `/books#${book.id}`,
+		text: `${book.data.title} ${book.data.author} ${book.data.status} ${book.data.description || ''} ${book.body}`,
+	})),
+];
+---
+
+<BaseLayout title="搜索" description="搜索 May 的文章、项目和读书笔记。">
+	<div class="container layout-grid">
+		<div class="main-column">
+			<header class="page-hero">
+				<p class="eyebrow">Search</p>
+				<h1 class="page-title">搜索</h1>
+				<p class="page-description">支持搜索文章标题、摘要、标签、正文，也可以查找项目和读书记录。</p>
+			</header>
+			<section class="search-box" aria-label="全站搜索">
+				<input class="search-input" id="search-input" type="search" placeholder="输入关键词，例如 Android、AI、产品设计" autocomplete="off" />
+				<p class="article-meta"><span id="search-count">输入关键词开始搜索</span></p>
+			</section>
+			<div class="article-list" id="search-results"></div>
+		</div>
+		<Sidebar posts={posts} />
+	</div>
+	<script define:vars={{ searchItems }}>
+		const input = document.querySelector('#search-input');
+		const results = document.querySelector('#search-results');
+		const count = document.querySelector('#search-count');
+		const items = searchItems;
+
+		const escapeHtml = (value) =>
+			value.replace(/[&<>"']/g, (char) => ({
+				'&': '&amp;',
+				'<': '&lt;',
+				'>': '&gt;',
+				'"': '&quot;',
+				"'": '&#039;',
+			})[char]);
+
+		const render = (query) => {
+			const normalized = query.trim().toLowerCase();
+			if (!normalized) {
+				results.innerHTML = '<p class="empty-state">输入关键词后，会在这里展示搜索结果。</p>';
+				count.textContent = '输入关键词开始搜索';
+				return;
+			}
+			const matched = items
+				.map((item) => ({
+					...item,
+					score: item.text.toLowerCase().includes(normalized)
+						? item.title.toLowerCase().includes(normalized)
+							? 2
+							: 1
+						: 0,
+				}))
+				.filter((item) => item.score > 0)
+				.sort((a, b) => b.score - a.score || a.title.localeCompare(b.title, 'zh-CN'));
+
+			count.textContent = `找到 ${matched.length} 条结果`;
+			results.innerHTML = matched.length
+				? matched
+						.map((item) => `
+							<article class="article-item">
+								<a class="article-index" href="${item.url}" aria-label="${escapeHtml(item.title)}">${escapeHtml(item.type)}</a>
+								<div>
+									<h3 class="article-title"><a href="${item.url}">${escapeHtml(item.title)}</a></h3>
+									<p class="article-summary">${escapeHtml(item.description)}</p>
+									<div class="article-meta"><span class="pill">${escapeHtml(item.type)}</span></div>
+								</div>
+							</article>
+						`)
+						.join('')
+				: '<p class="empty-state">没有找到匹配内容。</p>';
+		};
+
+		input.addEventListener('input', (event) => render(event.target.value));
+		render('');
+	</script>
+</BaseLayout>

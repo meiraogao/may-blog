@@ -1,0 +1,23 @@
+---
+import type { Book } from '../lib/content';
+import { getBookUrl } from '../lib/content';
+
+interface Props {
+	book: Book;
+}
+
+const { book } = Astro.props;
+---
+
+<article class="book-item" id={book.id}>
+	<a class="book-mark" href={getBookUrl(book)} aria-label={book.data.title}>
+		{book.data.status}
+	</a>
+	<div>
+		<h3 class="book-title">
+			<a href={getBookUrl(book)}>{book.data.title}</a>
+		</h3>
+		<p class="book-author">{book.data.author}{book.data.description ? ` · ${book.data.description}` : ''}</p>
+	</div>
+	<span class="pill">{book.data.status}</span>
+</article>

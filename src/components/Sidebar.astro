@@ -1,0 +1,87 @@
+---
+import { site } from '../lib/site';
+import type { Post } from '../lib/content';
+import { getAllTags } from '../lib/content';
+
+interface Props {
+	posts?: Post[];
+}
+
+const { posts = [] } = Astro.props;
+const tags = getAllTags(posts).slice(0, 14);
+const years = [...new Set(posts.map((post) => post.data.date.getFullYear()))].slice(0, 6);
+---
+
+<aside class="sidebar" aria-label="侧边栏">
+	<section class="panel profile-card">
+		<div class="profile-orbit" aria-hidden="true">
+			<span></span>
+			<span></span>
+		</div>
+		<div class="profile-head">
+			<div class="avatar" aria-hidden="true">{site.avatarText}</div>
+			<div>
+				<h2 class="profile-name">{site.name}</h2>
+				<p class="profile-tagline">{site.tagline}</p>
+			</div>
+		</div>
+		<ul class="profile-meta">
+			<li class="meta-row"><span>所在地</span><strong>{site.location}</strong></li>
+			<li class="meta-row"><span>职业</span><strong>{site.role}</strong></li>
+			<li class="meta-row"><span>{site.stats.label}</span><strong>{site.stats.value}</strong></li>
+		</ul>
+		<div class="tag-row">
+			<a class="tag" href={site.social.github}>GitHub</a>
+			<a class="tag" href={site.social.email}>Email</a>
+			<a class="tag" href={site.social.newsletter}>公众号</a>
+		</div>
+	</section>
+
+	<section class="panel now-card">
+		<p class="eyebrow">Now</p>
+		<h2>正在构建</h2>
+		<p>把技术、产品和阅读变成可持续复用的个人资料库。</p>
+		<div class="now-meter" aria-hidden="true"><span></span></div>
+	</section>
+
+	<section class="panel">
+		<p class="eyebrow">Categories</p>
+		<ul class="link-list">
+			{site.categories.map((category) => (
+				<li>
+					<a class="link-row" href={`/categories/${encodeURIComponent(category)}`}>
+						<span>{category}</span>
+						<strong>{posts.filter((post) => post.data.category === category).length}</strong>
+					</a>
+				</li>
+			))}
+		</ul>
+	</section>
+
+	{tags.length > 0 && (
+		<section class="panel">
+			<p class="eyebrow">Tags</p>
+			<div class="tag-row">
+				{tags.map((tag) => (
+					<a class="tag" href={`/tags/${encodeURIComponent(tag.name)}`}>{tag.name}</a>
+				))}
+			</div>
+		</section>
+	)}
+
+	{years.length > 0 && (
+		<section class="panel">
+			<p class="eyebrow">Archive</p>
+			<ul class="compact-list">
+				{years.map((year) => (
+					<li>
+						<a class="link-row" href="/archive">
+							<span>{year}</span>
+							<strong>{posts.filter((post) => post.data.date.getFullYear() === year).length}</strong>
+						</a>
+					</li>
+				))}
+			</ul>
+		</section>
+	)}
+</aside>

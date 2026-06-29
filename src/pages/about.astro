@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Sidebar from '../components/Sidebar.astro';
+import { site } from '../lib/site';
+import { getPublishedPosts } from '../lib/content';
+
+const posts = await getPublishedPosts();
+---
+
+<BaseLayout title="关于" description="关于 May，Android Developer，Creator & Builder。">
+	<div class="container layout-grid">
+		<div class="main-column">
+			<header class="page-hero">
+				<p class="eyebrow">About</p>
+				<h1 class="page-title">关于 May</h1>
+				<p class="page-description">{site.tagline}。目前在中国北京，关注 Android 工程实践、AI 产品、个人项目和长期写作。</p>
+			</header>
+			<section class="panel prose">
+				<h2>我在记录什么</h2>
+				<p>这个站点会放技术文章、项目记录、AI 和产品观察、投资复盘、读书笔记，以及一些不急着发表在社交平台上的生活随笔。</p>
+				<h2>我关心的方向</h2>
+				<ul>
+					<li>Android 工程质量、性能优化和开发效率</li>
+					<li>AI 产品如何真正进入人的工作流</li>
+					<li>小工具、个人项目和长期主义写作</li>
+					<li>阅读、投资和生活里的复盘方法</li>
+				</ul>
+				<h2>联系入口</h2>
+				<p>GitHub、邮箱和公众号目前是配置占位，后续可以在 <code>src/lib/site.ts</code> 里替换为真实链接。</p>
+			</section>
+		</div>
+		<Sidebar posts={posts} />
+	</div>
+</BaseLayout>

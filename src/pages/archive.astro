@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Sidebar from '../components/Sidebar.astro';
+import { formatDate, getPostUrl, getPublishedPosts } from '../lib/content';
+
+const posts = await getPublishedPosts();
+const grouped = posts.reduce<Record<string, typeof posts>>((acc, post) => {
+	const year = String(post.data.date.getFullYear());
+	acc[year] = acc[year] || [];
+	acc[year].push(post);
+	return acc;
+}, {});
+const years = Object.keys(grouped).sort((a, b) => Number(b) - Number(a));
+---
+
+<BaseLayout title="归档" description="按年份查看 May 的文章归档。">
+	<div class="container layout-grid">
+		<div class="main-column">
+			<header class="page-hero">
+				<p class="eyebrow">Archive</p>
+				<h1 class="page-title">归档</h1>
+				<p class="page-description">按时间顺序回看所有文章，观察问题、兴趣和写作主题的变化。</p>
+			</header>
+			{years.map((year) => (
+				<section class="archive-group">
+					<h2 class="archive-year">{year}</h2>
+					{grouped[year].map((post) => (
+						<a class="archive-item" href={getPostUrl(post)}>
+							<time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+							<span>{post.data.title}</span>
+						</a>
+					))}
+				</section>
+			))}
+		</div>
+		<Sidebar posts={posts} />
+	</div>
+</BaseLayout>

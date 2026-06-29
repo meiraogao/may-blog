@@ -1,17 +1,137 @@
 ---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Sidebar from '../components/Sidebar.astro';
+import PostCard from '../components/PostCard.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import BookItem from '../components/BookItem.astro';
+import { site } from '../lib/site';
+import { getAllBooks, getAllProjects, getPublishedPosts } from '../lib/content';
 
+const posts = await getPublishedPosts();
+const projects = await getAllProjects();
+const books = await getAllBooks();
+
+const pinnedPosts = posts.filter((post) => post.data.pinned).slice(0, 3);
+const latestPosts = posts.filter((post) => !post.data.pinned).slice(0, 6);
+const featuredProjects = projects.filter((project) => project.data.featured).slice(0, 4);
+const featuredBooks = books.filter((book) => book.data.featured).slice(0, 4);
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout title={site.name} description={site.description}>
+	<div class="container layout-grid">
+		<div class="main-column">
+			<section class="hero" aria-labelledby="hero-title">
+				<div>
+					<div class="hero-kicker">
+						<span>May OS</span>
+						<span>Beijing · Android · AI</span>
+					</div>
+					<h1 id="hero-title">{site.name}</h1>
+					<p>{site.tagline}。把 Android 工程实践、AI 产品观察、读书笔记、投资复盘和生活里的长期问题，整理成一间持续生长的个人工作室。</p>
+					<div class="hero-actions">
+						<a class="button primary" href="/posts">阅读文章</a>
+						<a class="button" href="/projects">查看项目</a>
+						<a class="button" href="/about">了解 May</a>
+					</div>
+				</div>
+				<div class="hero-console" aria-label="个人状态">
+					<div class="console-top">
+						<span></span>
+						<span></span>
+						<span></span>
+					</div>
+					<div class="console-body">
+						<div class="console-line">
+							<span>role</span>
+							<strong>{site.role}</strong>
+						</div>
+						<div class="console-line">
+							<span>base</span>
+							<strong>{site.location}</strong>
+						</div>
+						<div class="console-line">
+							<span>focus</span>
+							<strong>Android / AI / Product</strong>
+						</div>
+						<div class="console-line">
+							<span>mode</span>
+							<strong>Creator & Builder</strong>
+						</div>
+					</div>
+					<div class="console-footer">
+						<span>writing.log</span>
+						<span>{posts.length} notes</span>
+					</div>
+				</div>
+			</section>
+
+			<section class="signal-strip" aria-label="站点主题">
+				<a href="/categories/技术">
+					<span>01</span>
+					<strong>Android 工程</strong>
+				</a>
+				<a href="/categories/AI">
+					<span>02</span>
+					<strong>AI 产品</strong>
+				</a>
+				<a href="/books">
+					<span>03</span>
+					<strong>阅读与复盘</strong>
+				</a>
+			</section>
+
+			<section class="section" aria-labelledby="pinned-title">
+				<div class="section-head">
+					<div>
+						<p class="eyebrow">Pinned</p>
+						<h2 class="section-title" id="pinned-title">置顶文章</h2>
+					</div>
+					<a class="text-link" href="/posts">全部文章</a>
+				</div>
+				<div class="article-list">
+					{pinnedPosts.map((post) => <PostCard post={post} />)}
+				</div>
+			</section>
+
+			<section class="section" aria-labelledby="latest-title">
+				<div class="section-head">
+					<div>
+						<p class="eyebrow">Latest</p>
+						<h2 class="section-title" id="latest-title">最新文章</h2>
+					</div>
+					<a class="text-link" href="/archive">查看归档</a>
+				</div>
+				<div class="article-list">
+					{latestPosts.map((post) => <PostCard post={post} />)}
+				</div>
+			</section>
+
+			<section class="section" aria-labelledby="projects-title">
+				<div class="section-head">
+					<div>
+						<p class="eyebrow">Projects</p>
+						<h2 class="section-title" id="projects-title">精选项目</h2>
+					</div>
+					<a class="text-link" href="/projects">项目列表</a>
+				</div>
+				<div class="project-grid">
+					{featuredProjects.map((project) => <ProjectCard project={project} />)}
+				</div>
+			</section>
+
+			<section class="section" aria-labelledby="books-title">
+				<div class="section-head">
+					<div>
+						<p class="eyebrow">Reading</p>
+						<h2 class="section-title" id="books-title">读书笔记</h2>
+					</div>
+					<a class="text-link" href="/books">读书页</a>
+				</div>
+				<div class="book-list">
+					{featuredBooks.map((book) => <BookItem book={book} />)}
+				</div>
+			</section>
+		</div>
+		<Sidebar posts={posts} />
+	</div>
+</BaseLayout>
