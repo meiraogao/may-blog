@@ -5,7 +5,7 @@ export const site = {
 	location: '中国北京',
 	role: 'Android Developer',
 	avatarText: 'M',
-	url: 'https://may.example.com',
+	url: 'https://teachermay.com',
 	social: {
 		github: '#',
 		email: 'mailto:hello@example.com',
